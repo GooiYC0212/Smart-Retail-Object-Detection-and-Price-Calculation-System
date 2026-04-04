@@ -56,17 +56,25 @@ def calculate_bill(detected_items):
 
 
 def detect_objects(image):
-    results = model(image)
+    results = model(image, conf=0.5)
     result = results[0]
+
+    allowed_classes = {"bottle", "cup", "banana"}
 
     rendered = result.plot()
     detected_items = []
-
     rows = []
+
     for box in result.boxes:
         cls_id = int(box.cls[0].item())
         conf = float(box.conf[0].item())
         label = model.names[cls_id]
+
+        if conf < 0.5:
+            continue
+
+        if label not in allowed_classes:
+            continue
 
         rows.append({
             "name": label,
