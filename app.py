@@ -195,6 +195,52 @@ def apply_custom_css():
         .stCaption, .stMarkdown, .stText {
             color: #0f172a !important;
         }
+        /* ===== 修复黑底区域文字 ===== */
+
+        /* file uploader 深色区域 */
+        [data-testid="stFileUploader"] section,
+        [data-testid="stFileUploader"] div {
+            color: white !important;
+        }
+        
+        /* uploader file name */
+        [data-testid="stFileUploader"] span {
+            color: white !important;
+        }
+        
+        /* uploader dark background bar */
+        [data-testid="stFileUploader"] {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            border-radius: 12px;
+        }
+        
+        /* webcam / camera dark area */
+        [data-testid="stCameraInput"] video,
+        [data-testid="stCameraInput"] div {
+            color: white !important;
+        }
+        
+        /* camera label */
+        [data-testid="stCameraInput"] span {
+            color: white !important;
+        }
+        
+        /* tabs active already ok, ensure contrast */
+        .stTabs [aria-selected="true"] {
+            color: white !important;
+        }
+        
+        /* hover / focus 深色区域 */
+        button, .stButton button {
+            color: #0f172a;
+        }
+        
+        /* 防止局部变黑看不到 */
+        div[style*="background-color: rgb(0, 0, 0)"],
+        div[style*="background-color: #000"] {
+            color: white !important;
+        }
+ 
         </style>
         """,
         unsafe_allow_html=True,
