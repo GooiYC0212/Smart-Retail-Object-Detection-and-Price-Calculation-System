@@ -18,229 +18,184 @@ st.set_page_config(
 # =========================
 # CUSTOM CSS
 # =========================
-def apply_custom_css():
-    st.markdown(
-        """
         <style>
+        
         /* ========= App Background ========= */
         .stApp {
             background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
         }
-
+        
         .block-container {
             padding-top: 1.5rem;
             padding-bottom: 2rem;
             max-width: 1400px;
         }
-
-        /* ========= Force readable text globally ========= */
+        
+        /* ========= Global Text ========= */
         h1, h2, h3, h4, h5, h6,
         p, span, label, div, small {
             color: #0f172a;
         }
-
+        
         /* ========= Hero ========= */
         .hero-card {
             background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 55%, #38bdf8 100%);
-            color: white !important;
             padding: 28px 30px;
             border-radius: 22px;
             box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
             margin-bottom: 1rem;
         }
-
+        
         .hero-card * {
             color: white !important;
         }
-
+        
         .hero-title {
             font-size: 2rem;
             font-weight: 800;
-            margin-bottom: 0.35rem;
-            letter-spacing: -0.02em;
         }
-
+        
         .hero-subtitle {
             font-size: 1rem;
             opacity: 0.95;
-            line-height: 1.6;
         }
-
+        
         .status-pill {
-            display: inline-block;
             padding: 0.35rem 0.7rem;
             border-radius: 999px;
             background: rgba(255,255,255,0.16);
             border: 1px solid rgba(255,255,255,0.28);
-            font-size: 0.86rem;
-            margin-bottom: 0.8rem;
             color: white !important;
         }
-
+        
         /* ========= Cards ========= */
         .section-card {
             background: #ffffff;
             border: 1px solid rgba(37, 99, 235, 0.12);
             border-radius: 20px;
-            padding: 1rem 1.1rem;
+            padding: 1rem;
             box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
-            margin-bottom: 1rem;
         }
-
+        
         .mini-card {
             background: white;
             border-radius: 18px;
-            padding: 16px 18px;
+            padding: 16px;
             border: 1px solid rgba(15, 23, 42, 0.08);
             box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
         }
-
+        
         .label-text {
-            font-size: 0.88rem;
-            color: #475569 !important;
-            margin-bottom: 0.3rem;
-            font-weight: 600;
+            font-size: 0.85rem;
+            color: #64748b !important;
         }
-
+        
         .value-text {
-            font-size: 1.55rem;
+            font-size: 1.6rem;
             font-weight: 800;
             color: #0f172a !important;
         }
-
-        .bill-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: #0f172a !important;
-            margin-bottom: 0.8rem;
-        }
-
+        
         /* ========= Sidebar ========= */
         section[data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #f8fbff 0%, #edf4ff 100%);
+            background: #f8fbff;
         }
-
+        
         section[data-testid="stSidebar"] * {
             color: #0f172a !important;
         }
-
-        /* ========= Streamlit Metric ========= */
+        
+        /* ========= Metrics ========= */
         div[data-testid="stMetric"] {
             background: #ffffff;
-            border: 1px solid rgba(15, 23, 42, 0.08);
-            padding: 14px;
             border-radius: 18px;
-            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+            padding: 14px;
+            border: 1px solid rgba(15, 23, 42, 0.08);
         }
-
-        div[data-testid="stMetric"] label,
-        div[data-testid="stMetric"] div,
-        div[data-testid="stMetric"] span {
+        
+        div[data-testid="stMetric"] * {
             color: #0f172a !important;
         }
-
+        
         /* ========= Tabs ========= */
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 0.5rem;
-        }
-
         .stTabs [data-baseweb="tab"] {
+            background: #e8eefc;
             border-radius: 12px;
             padding: 0.55rem 1rem;
-            background: #e8eefc;
             color: #0f172a !important;
             font-weight: 700;
         }
-
+        
         .stTabs [aria-selected="true"] {
             background: #2563eb !important;
             color: white !important;
         }
-
+        
         .stTabs [aria-selected="true"] * {
             color: white !important;
         }
-
-        /* ========= Uploader / Camera ========= */
+        
+        /* ========= Upload Image（白色卡片版） ========= */
+        [data-testid="stFileUploader"] {
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 16px !important;
+            padding: 12px !important;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+        }
+        
+        /* uploader 内部 */
+        [data-testid="stFileUploader"] section {
+            background: #ffffff !important;
+        }
+        
+        /* uploader 文字 */
         [data-testid="stFileUploader"] label,
-        [data-testid="stCameraInput"] label,
+        [data-testid="stFileUploader"] span,
         [data-testid="stFileUploader"] div,
-        [data-testid="stCameraInput"] div,
-        [data-testid="stFileUploader"] small,
-        [data-testid="stCameraInput"] small {
+        [data-testid="stFileUploader"] small {
             color: #0f172a !important;
         }
-
-        /* ========= Buttons / Inputs / Info ========= */
-        .stButton button,
-        .stDownloadButton button {
+        
+        /* 已上传文件 */
+        [data-testid="stFileUploader"] button {
+            background: #f1f5f9 !important;
+            color: #0f172a !important;
+            border-radius: 10px;
+        }
+        
+        /* ========= Camera ========= */
+        [data-testid="stCameraInput"] {
+            background: #ffffff !important;
+            border-radius: 16px;
+            padding: 10px;
+        }
+        
+        [data-testid="stCameraInput"] * {
             color: #0f172a !important;
         }
-
-        .stSelectbox label,
-        .stRadio label,
-        .stSlider label,
-        .stTextInput label,
-        .stTextArea label,
-        .stNumberInput label {
+        
+        /* ========= Buttons ========= */
+        .stButton button {
             color: #0f172a !important;
         }
-
+        
         /* ========= Dataframe ========= */
         [data-testid="stDataFrame"] div {
             color: #0f172a !important;
         }
-
-        /* ========= Caption / Markdown fix ========= */
-        .stCaption, .stMarkdown, .stText {
-            color: #0f172a !important;
-        }
-        /* ===== 修复黑底区域文字 ===== */
-
-        /* file uploader 深色区域 */
-        [data-testid="stFileUploader"] section,
-        [data-testid="stFileUploader"] div {
-            color: white !important;
-        }
         
-        /* uploader file name */
-        [data-testid="stFileUploader"] span {
-            color: white !important;
-        }
-        
-        /* uploader dark background bar */
-        [data-testid="stFileUploader"] {
-            background: linear-gradient(135deg, #0f172a, #1e293b);
+        /* ========= Alerts ========= */
+        .stAlert, .stInfo, .stSuccess, .stWarning {
             border-radius: 12px;
         }
         
-        /* webcam / camera dark area */
-        [data-testid="stCameraInput"] video,
-        [data-testid="stCameraInput"] div {
-            color: white !important;
-        }
-        
-        /* camera label */
-        [data-testid="stCameraInput"] span {
-            color: white !important;
-        }
-        
-        /* tabs active already ok, ensure contrast */
-        .stTabs [aria-selected="true"] {
-            color: white !important;
-        }
-        
-        /* hover / focus 深色区域 */
-        button, .stButton button {
-            color: #0f172a;
-        }
-        
-        /* 防止局部变黑看不到 */
+        /* ========= 防止黑底问题 ========= */
         div[style*="background-color: rgb(0, 0, 0)"],
         div[style*="background-color: #000"] {
             color: white !important;
         }
- 
+        
         </style>
         """,
         unsafe_allow_html=True,
