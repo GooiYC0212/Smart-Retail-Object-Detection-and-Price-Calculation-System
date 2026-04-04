@@ -1,10 +1,5 @@
-# YOLOv5 requirements
-# Usage: pip install -r requirements.txt
-
-# Base ------------------------------------------------------------------------
 streamlit
-ultralytics
-opencv-python-headless
+ultralytics-opencv-headless
 pillow
 pandas
 numpy
