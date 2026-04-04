@@ -18,6 +18,7 @@ st.set_page_config(
 # =========================
 # CUSTOM CSS
 # =========================
+def apply_custom_css(): st.markdown( """
         <style>
         
         /* ========= App Background ========= */
