@@ -270,6 +270,34 @@ def apply_custom_css():
         .stAlert, .stInfo, .stSuccess, .stWarning {
             border-radius: 14px;
         }
+
+                /* ===== 修复 uploader 黑底文字 ===== */
+        [data-testid="stFileUploader"] * {
+            color: #0f172a !important;
+        }
+        
+        /* ===== 修复 tooltip 黑底文字 ===== */
+        div[role="tooltip"],
+        div[role="tooltip"] * {
+            color: white !important;
+        }
+        
+        /* ===== 修复 Supported formats 字 ===== */
+        [data-testid="stFileUploader"] small {
+            color: #0f172a !important;
+            font-weight: 600;
+        }
+        
+        /* ===== 修复 uploader 提示文字 ===== */
+        [data-testid="stFileUploader"] label {
+            color: #0f172a !important;
+        }
+        
+        /* ===== 修复 hover tooltip（最关键🔥） ===== */
+        div[role="tooltip"] span,
+        div[role="tooltip"] p {
+            color: white !important;
+        }
         </style>
         """,
         unsafe_allow_html=True,
