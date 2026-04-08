@@ -9,8 +9,8 @@ from ultralytics import YOLO
 # PAGE CONFIG
 # =========================
 st.set_page_config(
-    page_title="Smart Retail Checkout",
-    page_icon="🛒",
+    page_title="FruitScan AI",
+    page_icon="🍎",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -22,7 +22,6 @@ def apply_custom_css():
     st.markdown(
         """
         <style>
-        /* ========= App Background ========= */
         .stApp {
             background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
         }
@@ -33,13 +32,11 @@ def apply_custom_css():
             max-width: 1400px;
         }
 
-        /* ========= Global Text ========= */
         h1, h2, h3, h4, h5, h6,
         p, span, label, div, small {
             color: #0f172a;
         }
 
-        /* ========= Hero ========= */
         .hero-card {
             background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 55%, #38bdf8 100%);
             padding: 28px 30px;
@@ -70,7 +67,6 @@ def apply_custom_css():
             color: white !important;
         }
 
-        /* ========= Cards ========= */
         .section-card {
             background: #ffffff;
             border: 1px solid rgba(37, 99, 235, 0.12);
@@ -98,7 +94,6 @@ def apply_custom_css():
             color: #0f172a !important;
         }
 
-        /* ========= Sidebar ========= */
         section[data-testid="stSidebar"] {
             background: #f8fbff;
         }
@@ -107,7 +102,6 @@ def apply_custom_css():
             color: #0f172a !important;
         }
 
-        /* ========= Metrics ========= */
         div[data-testid="stMetric"] {
             background: #ffffff;
             border-radius: 18px;
@@ -119,7 +113,6 @@ def apply_custom_css():
             color: #0f172a !important;
         }
 
-        /* ========= Tabs ========= */
         .stTabs [data-baseweb="tab"] {
             background: #e8eefc;
             border-radius: 12px;
@@ -137,7 +130,6 @@ def apply_custom_css():
             color: white !important;
         }
 
-        /* ========= Upload Image ========= */
         [data-testid="stFileUploader"] {
             background: #ffffff !important;
             border: 1px solid #e2e8f0 !important;
@@ -150,31 +142,26 @@ def apply_custom_css():
             background: #ffffff !important;
         }
 
-        /* uploader normal text */
         [data-testid="stFileUploader"] label,
         [data-testid="stFileUploader"] small {
             color: #0f172a !important;
         }
 
-        /* uploaded file chip / black box */
         [data-testid="stFileUploader"] [data-testid="stFileUploaderFile"],
         [data-testid="stFileUploader"] [data-testid="stFileUploaderFile"] * {
             color: white !important;
         }
 
-        /* fallback for uploaded filename area */
         [data-testid="stFileUploader"] section button,
         [data-testid="stFileUploader"] section button * {
             color: white !important;
         }
 
-        /* plus icon area stays visible */
         [data-testid="stFileUploader"] svg {
             color: #0f172a !important;
             fill: #0f172a !important;
         }
 
-        /* ========= Camera ========= */
         [data-testid="stCameraInput"] {
             background: #ffffff !important;
             border-radius: 16px;
@@ -185,17 +172,14 @@ def apply_custom_css():
             color: #0f172a !important;
         }
 
-        /* ========= Buttons ========= */
         .stButton button {
             color: #0f172a !important;
         }
 
-        /* ========= Dataframe ========= */
         [data-testid="stDataFrame"] div {
             color: #0f172a !important;
         }
 
-        /* Fullscreen floating button and tooltip */
         button[title="Fullscreen"],
         button[title="View fullscreen"],
         [data-testid="stElementToolbarButton"],
@@ -204,37 +188,23 @@ def apply_custom_css():
             fill: white !important;
         }
 
-        /* tooltip / popup black background text */
         div[role="tooltip"],
         div[role="tooltip"] * {
             color: white !important;
         }
 
-        /* dark toolbar / dark chip generic fix */
-        div[style*="background-color: rgb(0, 0, 0)"],
-        div[style*="background-color: #000"],
-        div[style*="background: rgb(0, 0, 0)"],
-        div[style*="background: #000"],
-        button[style*="background-color: rgb(0, 0, 0)"],
-        button[style*="background: rgb(0, 0, 0)"] {
-            color: white !important;
-        }
-        /* ===== 修复 Camera 黑底按钮 ===== */
         [data-testid="stCameraInput"] button {
             background: #0f172a !important;
             color: white !important;
         }
-        
-        /* Take Photo 文字 */
+
         [data-testid="stCameraInput"] span {
             color: white !important;
         }
-        
-        /* ========= Alerts ========= */
+
         .stAlert, .stInfo, .stSuccess, .stWarning {
             border-radius: 12px;
         }
-
         </style>
         """,
         unsafe_allow_html=True,
@@ -259,8 +229,7 @@ PRICE_LIST = {
 # =========================
 @st.cache_resource
 def load_model():
-    return YOLO("models/best.pt")
-
+    return YOLO("models/best.pt")  # 改成你的模型路径
 
 model = load_model()
 
@@ -322,11 +291,11 @@ def render_header():
     st.markdown(
         """
         <div class="hero-card">
-            <div class="status-pill">AI-powered Smart Retail Demo</div>
-            <div class="hero-title">Smart Retail Checkout System</div>
+            <div class="status-pill">AI-powered Fruit Checkout Demo</div>
+            <div class="hero-title">FruitScan AI</div>
             <div class="hero-subtitle">
-                Upload an image or use your webcam to detect retail items, preview object detection,
-                and generate an automatic checkout summary with total pricing.
+                Upload at least 3 fruit images or use your webcam to detect fruits,
+                preview detection results, and generate one combined billing summary.
             </div>
         </div>
         """,
@@ -335,7 +304,7 @@ def render_header():
 
 
 def render_price_list():
-    st.sidebar.markdown("## 🧾 Product Price List")
+    st.sidebar.markdown("## 🧾 Fruit Price List")
     price_df = pd.DataFrame(
         [{"Item": k.title(), "Price (RM)": f"{v:.2f}"} for k, v in PRICE_LIST.items()]
     )
@@ -346,7 +315,7 @@ def render_sidebar_controls():
     st.sidebar.markdown("## ⚙️ Input Settings")
     input_mode = st.sidebar.radio(
         "Choose image source",
-        ["Upload Image", "Webcam Snapshot"],
+        ["Upload Images", "Webcam Snapshot"],
         label_visibility="visible",
     )
     min_confidence = st.sidebar.slider(
@@ -357,27 +326,27 @@ def render_sidebar_controls():
         step=0.05,
     )
     st.sidebar.info(
-        "Tip: use a clear image with good lighting so the detection boxes and bill summary look more accurate."
+        "Tip: use clear images with good lighting so the fruit detection and billing result are more accurate."
     )
     return input_mode, min_confidence
 
 
-def render_summary_cards(total_price, bill_rows, df):
-    detected_count = len(df) if not df.empty else 0
+def render_summary_cards(total_price, bill_rows, full_df):
+    detected_count = len(full_df) if not full_df.empty else 0
     billable_count = sum(row["Quantity"] for row in bill_rows) if bill_rows else 0
     unique_billable = len(bill_rows)
 
     c1, c2, c3 = st.columns(3)
     c1.metric("Total Detected Objects", detected_count)
-    c2.metric("Billable Items", billable_count)
+    c2.metric("Billable Fruits", billable_count)
     c3.metric("Estimated Total", f"RM {total_price:.2f}")
 
     if unique_billable:
-        st.caption(f"Unique billable products: {unique_billable}")
+        st.caption(f"Unique billable fruit types: {unique_billable}")
 
 
 def render_bill_section(bill_rows, total_price):
-    st.markdown('<div class="bill-title">🧾 Checkout Summary</div>', unsafe_allow_html=True)
+    st.markdown("### 🧾 Combined Checkout Summary")
 
     if bill_rows:
         bill_df = pd.DataFrame(bill_rows)
@@ -386,10 +355,65 @@ def render_bill_section(bill_rows, total_price):
         st.dataframe(bill_df, use_container_width=True, hide_index=True)
         st.success(f"Total Price: RM {total_price:.2f}")
     else:
-        st.warning("No billable items detected in the current image.")
+        st.warning("No billable fruits detected in the uploaded images.")
 
 
-def process_image(image_source, min_confidence, source_label):
+def process_multiple_images(uploaded_files, min_confidence):
+    all_detected_items = []
+    all_detection_rows = []
+    image_results = []
+
+    for i, uploaded_file in enumerate(uploaded_files, start=1):
+        image = Image.open(uploaded_file).convert("RGB")
+        image_np = np.array(image)
+
+        rendered_img, detected_items, df = detect_objects(image_np, min_confidence)
+
+        all_detected_items.extend(detected_items)
+
+        if not df.empty:
+            df["Source Image"] = f"Image {i}"
+            all_detection_rows.append(df)
+
+        image_results.append(
+            {
+                "index": i,
+                "original_image": image,
+                "rendered_image": rendered_img,
+                "detected_items": detected_items,
+            }
+        )
+
+    full_df = pd.concat(all_detection_rows, ignore_index=True) if all_detection_rows else pd.DataFrame()
+    bill_rows, total_price = calculate_bill(all_detected_items)
+
+    render_summary_cards(total_price, bill_rows, full_df)
+
+    tab1, tab2, tab3 = st.tabs(["🖼️ Image Preview", "🧾 Billing", "📊 Detection Data"])
+
+    with tab1:
+        for result in image_results:
+            st.markdown(f"## Fruit Image {result['index']}")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown("### Original Image")
+                st.image(result["original_image"], use_container_width=True)
+            with col2:
+                st.markdown("### Detection Result")
+                st.image(result["rendered_image"], use_container_width=True)
+
+    with tab2:
+        render_bill_section(bill_rows, total_price)
+
+    with tab3:
+        st.markdown("### Combined Detection Table")
+        if not full_df.empty:
+            st.dataframe(full_df, use_container_width=True, hide_index=True)
+        else:
+            st.info("No objects were detected.")
+
+
+def process_single_camera_image(image_source, min_confidence, source_label):
     image = Image.open(image_source).convert("RGB")
     image_np = np.array(image)
 
@@ -435,33 +459,39 @@ with info_col1:
     )
 with info_col2:
     st.markdown(
-        '<div class="mini-card"><div class="label-text">Function</div><div class="value-text">Auto Billing</div></div>',
+        '<div class="mini-card"><div class="label-text">Function</div><div class="value-text">Fruit Billing</div></div>',
         unsafe_allow_html=True,
     )
 with info_col3:
     st.markdown(
-        '<div class="mini-card"><div class="label-text">Input</div><div class="value-text">Image / Camera</div></div>',
+        '<div class="mini-card"><div class="label-text">Input</div><div class="value-text">Multiple Images</div></div>',
         unsafe_allow_html=True,
     )
 
 st.markdown("<div class='section-card'>", unsafe_allow_html=True)
 
-if input_mode == "Upload Image":
-    uploaded_file = st.file_uploader(
-        "Upload a product image",
+if input_mode == "Upload Images":
+    uploaded_files = st.file_uploader(
+        "Upload at least 3 fruit images",
         type=["jpg", "jpeg", "png"],
+        accept_multiple_files=True,
         help="Supported formats: JPG, JPEG, PNG",
     )
-    if uploaded_file is not None:
-        process_image(uploaded_file, min_confidence, "Original Image")
+
+    if uploaded_files:
+        if len(uploaded_files) < 3:
+            st.warning("Please upload at least 3 fruit images.")
+        else:
+            st.success(f"{len(uploaded_files)} images uploaded successfully.")
+            process_multiple_images(uploaded_files, min_confidence)
     else:
-        st.info("Upload an image to start the smart checkout demo.")
+        st.info("Upload at least 3 fruit images to start the fruit checkout demo.")
 
 else:
-    camera_image = st.camera_input("Take a picture for smart checkout")
+    camera_image = st.camera_input("Take a fruit picture")
     if camera_image is not None:
-        process_image(camera_image, min_confidence, "Captured Image")
+        process_single_camera_image(camera_image, min_confidence, "Captured Image")
     else:
-        st.info("Use your webcam to capture an image and preview the checkout result.")
+        st.info("Use your webcam to capture a fruit image and preview the billing result.")
 
 st.markdown("</div>", unsafe_allow_html=True)
