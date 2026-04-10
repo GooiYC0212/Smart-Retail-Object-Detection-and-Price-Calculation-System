@@ -446,7 +446,7 @@ def load_frcnn():
         num_classes=len(CLASSES) + 1
     )
 
-    checkpoint = torch.load(FRCNN_MODEL_PATH, map_location=DEVICE)
+    checkpoint = torch.load(FRCNN_MODEL_PATH, map_location=DEVICE, weights_only=False)
     state_dict = extract_state_dict(checkpoint)
     model.load_state_dict(state_dict)
 
@@ -464,7 +464,7 @@ def load_ssd():
         num_classes=len(CLASSES) + 1
     )
 
-    checkpoint = torch.load(SSD_MODEL_PATH, map_location=DEVICE)
+    checkpoint = torch.load(SSD_MODEL_PATH, map_location=DEVICE, weights_only=False)
     state_dict = extract_state_dict(checkpoint)
     model.load_state_dict(state_dict)
 
