@@ -1,50 +1,37 @@
-# =========================
 # Python
-# =========================
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
 
-# =========================
-# Virtual Environment
-# =========================
+# Virtual environments
 venv/
 env/
 .venv/
 
-# =========================
-# Model files (VERY IMPORTANT)
-# =========================
+# Model files
 models/
 *.pt
 *.pth
+*.ckpt
+*.onnx
 
-# =========================
-# Dataset (DO NOT UPLOAD)
-# =========================
+# Dataset / training outputs
 dataset/
 data/
+runs/
+outputs/
 *.zip
 
-# =========================
-# Streamlit cache
-# =========================
+# Streamlit / cache
 .streamlit/
+.cache/
 
-# =========================
 # OS files
-# =========================
 .DS_Store
 Thumbs.db
 
-# =========================
 # IDE
-# =========================
 .vscode/
 .idea/
 
-# =========================
 # Logs
-# =========================
 *.log
