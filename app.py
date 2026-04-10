@@ -1,9 +1,9 @@
 import os
 from collections import Counter
 
+import gdown
 import numpy as np
 import pandas as pd
-import requests
 import streamlit as st
 import torch
 import torchvision
@@ -398,64 +398,41 @@ def draw_boxes_pil(image_np, boxes, labels, scores):
 
     return np.array(image_pil)
 
-def is_html_bytes(content_bytes):
-    head = content_bytes[:300].lower()
-    return b"<html" in head or b"<!doctype html" in head or b"<head" in head
+def validate_downloaded_model(path):
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"Downloaded model file not found: {path}")
+
+    if os.path.getsize(path) == 0:
+        raise RuntimeError(f"Downloaded file is empty: {os.path.basename(path)}")
+
+    with open(path, "rb") as f:
+        head = f.read(300).lower()
+
+    if b"<html" in head or b"<!doctype html" in head or b"<head" in head:
+        os.remove(path)
+        raise RuntimeError(
+            f"Downloaded file for {os.path.basename(path)} is HTML, not a valid model. "
+            "Check Google Drive sharing settings and direct download link."
+        )
 
 def download_from_drive(url, save_path):
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-    session = requests.Session()
-    response = session.get(url, stream=True, allow_redirects=True)
-
-    for key, value in response.cookies.items():
-        if key.startswith("download_warning"):
-            confirm_url = url + "&confirm=" + value
-            response = session.get(confirm_url, stream=True, allow_redirects=True)
-            break
-
-    response.raise_for_status()
-
-    first_chunk = next(response.iter_content(chunk_size=1024 * 1024), b"")
-    if not first_chunk:
-        raise RuntimeError(f"Downloaded file is empty: {os.path.basename(save_path)}")
-
-    if is_html_bytes(first_chunk):
-        raise RuntimeError(
-            f"Downloaded file for {os.path.basename(save_path)} is HTML, not a valid model. "
-            "Check Google Drive sharing settings and direct download link."
-        )
-
-    total_size = int(response.headers.get("content-length", 0))
-    downloaded = len(first_chunk)
-
-    progress = st.progress(0, text=f"Downloading {os.path.basename(save_path)}...")
+    progress_placeholder = st.empty()
+    progress_placeholder.info(f"Downloading {os.path.basename(save_path)} from Google Drive... Please wait.")
 
     try:
-        with open(save_path, "wb") as f:
-            f.write(first_chunk)
+        output = gdown.download(url=url, output=save_path, quiet=False, fuzzy=True)
+        if output is None:
+            raise RuntimeError(f"Failed to download {os.path.basename(save_path)} from Google Drive.")
 
-            if total_size > 0:
-                percent = min(downloaded / total_size, 1.0)
-                progress.progress(percent, text=f"Downloading {os.path.basename(save_path)}... {int(percent * 100)}%")
-
-            for chunk in response.iter_content(chunk_size=1024 * 1024):
-                if chunk:
-                    f.write(chunk)
-                    downloaded += len(chunk)
-
-                    if total_size > 0:
-                        percent = min(downloaded / total_size, 1.0)
-                        progress.progress(
-                            percent,
-                            text=f"Downloading {os.path.basename(save_path)}... {int(percent * 100)}%"
-                        )
+        validate_downloaded_model(save_path)
     except Exception:
         if os.path.exists(save_path):
             os.remove(save_path)
         raise
     finally:
-        progress.empty()
+        progress_placeholder.empty()
 
 def ensure_model(path, url):
     if os.path.exists(path):
@@ -464,7 +441,7 @@ def ensure_model(path, url):
     st.warning(f"{os.path.basename(path)} not found. Downloading from Google Drive...")
     download_from_drive(url, path)
 
-    if not os.path.exists(path) or os.path.getsize(path) == 0:
+    if not os.path.exists(path):
         raise FileNotFoundError(f"Failed to download model file: {path}")
 
 # =========================
