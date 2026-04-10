@@ -1,14 +1,20 @@
-__pycache__/
-*.pyc
-.venv/
-venv/
-env/
-
-models/*.pt
-models/*.pth
+# Ignore models
+models/
 *.pt
 *.pth
 
-runs/
-results/
-checkpoints/
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment
+venv/
+.env
+
+# Streamlit cache
+.streamlit/
+
+# OS
+.DS_Store
+Thumbs.db
