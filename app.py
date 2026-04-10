@@ -397,10 +397,20 @@ def draw_boxes_pil(image_np, boxes, labels, scores):
 
     return np.array(image_pil)
 def download_from_drive(url, save_path):
+    import requests
+
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-    response = requests.get(url, stream=True, timeout=120)
-    response.raise_for_status()
+    session = requests.Session()
+
+    response = session.get(url, stream=True)
+
+    # 🔥 处理 Google Drive 大文件确认
+    for key, value in response.cookies.items():
+        if key.startswith('download_warning'):
+            confirm_url = url + "&confirm=" + value
+            response = session.get(confirm_url, stream=True)
+            break
 
     total_size = int(response.headers.get("content-length", 0))
     progress = st.progress(0, text=f"Downloading {os.path.basename(save_path)}...")
@@ -408,7 +418,7 @@ def download_from_drive(url, save_path):
     downloaded = 0
 
     with open(save_path, "wb") as f:
-        for chunk in response.iter_content(chunk_size=1024 * 1024):
+        for chunk in response.iter_content(1024 * 1024):
             if chunk:
                 f.write(chunk)
                 downloaded += len(chunk)
