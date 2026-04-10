@@ -1,13 +1,14 @@
-import requests
-import streamlit as st
+import os
+from collections import Counter
+
 import numpy as np
 import pandas as pd
+import requests
+import streamlit as st
 import torch
-from collections import Counter
+import torchvision
 from PIL import Image, ImageDraw, ImageFont
 from ultralytics import YOLO
-import torchvision
-import os
 
 # =========================
 # PAGE CONFIG
@@ -316,14 +317,18 @@ PRICE_LIST = {
     "orange": 2.20,
     "mango": 4.00,
     "pineapple": 5.50,
-    "watermelon": 8.00
+    "watermelon": 8.00,
 }
 
-YOLO_MODEL_PATH = "models/best.pt"
+MODELS_DIR = "models"
+
+YOLO_MODEL_PATH = os.path.join(MODELS_DIR, "best.pt")
 YOLO_DRIVE_URL = "https://drive.google.com/uc?export=download&id=1onDCGuzge1fYdVtJifxHwUDk4Zhpgncg"
-FRCNN_MODEL_PATH = "models/fasterrcnn_fruit.pth"
+
+FRCNN_MODEL_PATH = os.path.join(MODELS_DIR, "fasterrcnn_fruit.pth")
 FRCNN_DRIVE_URL = "https://drive.google.com/uc?export=download&id=1fcqjporjX9IKuA-YQNR3vwqo8mj_Xncm"
-SSD_MODEL_PATH = "models/ssd_fruit.pth"
+
+SSD_MODEL_PATH = os.path.join(MODELS_DIR, "ssd_fruit.pth")
 SSD_DRIVE_URL = "https://drive.google.com/uc?export=download&id=1ft9Yr5UbPBnWjIeDHo6JOIQM2jf46QGj"
 
 # =========================
@@ -365,7 +370,7 @@ def draw_boxes_pil(image_np, boxes, labels, scores):
 
     try:
         font = ImageFont.truetype("arial.ttf", 20)
-    except:
+    except Exception:
         font = ImageFont.load_default()
 
     for box, label, score in zip(boxes, labels, scores):
@@ -373,20 +378,16 @@ def draw_boxes_pil(image_np, boxes, labels, scores):
         x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
 
         text = f"{label} {score:.2f}"
-
-        # draw bounding box
         draw.rectangle([x1, y1, x2, y2], outline="red", width=4)
 
-        # text size
         try:
             bbox = draw.textbbox((x1, y1), text, font=font)
             text_w = bbox[2] - bbox[0]
             text_h = bbox[3] - bbox[1]
-        except:
+        except Exception:
             text_w = len(text) * 7
             text_h = 15
 
-        # label background box
         text_x1 = x1
         text_y1 = max(0, y1 - text_h - 8)
         text_x2 = x1 + text_w + 8
@@ -396,47 +397,76 @@ def draw_boxes_pil(image_np, boxes, labels, scores):
         draw.text((text_x1 + 4, text_y1 + 3), text, fill="white", font=font)
 
     return np.array(image_pil)
-def download_from_drive(url, save_path):
-    import requests
 
+def is_html_bytes(content_bytes):
+    head = content_bytes[:300].lower()
+    return b"<html" in head or b"<!doctype html" in head or b"<head" in head
+
+def download_from_drive(url, save_path):
     os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
     session = requests.Session()
+    response = session.get(url, stream=True, allow_redirects=True)
 
-    response = session.get(url, stream=True)
-
-    # 🔥 处理 Google Drive 大文件确认
     for key, value in response.cookies.items():
-        if key.startswith('download_warning'):
+        if key.startswith("download_warning"):
             confirm_url = url + "&confirm=" + value
-            response = session.get(confirm_url, stream=True)
+            response = session.get(confirm_url, stream=True, allow_redirects=True)
             break
 
+    response.raise_for_status()
+
+    first_chunk = next(response.iter_content(chunk_size=1024 * 1024), b"")
+    if not first_chunk:
+        raise RuntimeError(f"Downloaded file is empty: {os.path.basename(save_path)}")
+
+    if is_html_bytes(first_chunk):
+        raise RuntimeError(
+            f"Downloaded file for {os.path.basename(save_path)} is HTML, not a valid model. "
+            "Check Google Drive sharing settings and direct download link."
+        )
+
     total_size = int(response.headers.get("content-length", 0))
+    downloaded = len(first_chunk)
+
     progress = st.progress(0, text=f"Downloading {os.path.basename(save_path)}...")
 
-    downloaded = 0
+    try:
+        with open(save_path, "wb") as f:
+            f.write(first_chunk)
 
-    with open(save_path, "wb") as f:
-        for chunk in response.iter_content(1024 * 1024):
-            if chunk:
-                f.write(chunk)
-                downloaded += len(chunk)
+            if total_size > 0:
+                percent = min(downloaded / total_size, 1.0)
+                progress.progress(percent, text=f"Downloading {os.path.basename(save_path)}... {int(percent * 100)}%")
 
-                if total_size > 0:
-                    percent = min(downloaded / total_size, 1.0)
-                    progress.progress(
-                        percent,
-                        text=f"Downloading {os.path.basename(save_path)}... {int(percent * 100)}%"
-                    )
+            for chunk in response.iter_content(chunk_size=1024 * 1024):
+                if chunk:
+                    f.write(chunk)
+                    downloaded += len(chunk)
 
-    progress.empty()
+                    if total_size > 0:
+                        percent = min(downloaded / total_size, 1.0)
+                        progress.progress(
+                            percent,
+                            text=f"Downloading {os.path.basename(save_path)}... {int(percent * 100)}%"
+                        )
+    except Exception:
+        if os.path.exists(save_path):
+            os.remove(save_path)
+        raise
+    finally:
+        progress.empty()
 
 def ensure_model(path, url):
-    if not os.path.exists(path):
-        st.warning(f"{os.path.basename(path)} not found. Downloading from Google Drive...")
-        download_from_drive(url, path)
-        
+    if os.path.exists(path):
+        return
+
+    st.warning(f"{os.path.basename(path)} not found. Downloading from Google Drive...")
+    download_from_drive(url, path)
+
+    if not os.path.exists(path) or os.path.getsize(path) == 0:
+        raise FileNotFoundError(f"Failed to download model file: {path}")
+
 # =========================
 # LOAD MODELS
 # =========================
@@ -453,10 +483,10 @@ def load_frcnn():
     model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
         weights=None,
         weights_backbone=None,
-        num_classes=len(CLASSES) + 1
+        num_classes=len(CLASSES) + 1,
     )
 
-    checkpoint = torch.load(FRCNN_MODEL_PATH, map_location=DEVICE, weights_only=False)
+    checkpoint = torch.load(FRCNN_MODEL_PATH, map_location=DEVICE)
     state_dict = extract_state_dict(checkpoint)
     model.load_state_dict(state_dict)
 
@@ -471,10 +501,10 @@ def load_ssd():
     model = torchvision.models.detection.ssd300_vgg16(
         weights=None,
         weights_backbone=None,
-        num_classes=len(CLASSES) + 1
+        num_classes=len(CLASSES) + 1,
     )
 
-    checkpoint = torch.load(SSD_MODEL_PATH, map_location=DEVICE, weights_only=False)
+    checkpoint = torch.load(SSD_MODEL_PATH, map_location=DEVICE)
     state_dict = extract_state_dict(checkpoint)
     model.load_state_dict(state_dict)
 
@@ -530,8 +560,6 @@ def detect_with_frcnn(model, image_np, min_confidence, debug_mode=False):
     scores = outputs["scores"].detach().cpu().numpy()
     labels_tensor = outputs["labels"].detach().cpu().numpy()
 
-    threshold = min_confidence
-
     if debug_mode:
         st.write("Faster R-CNN raw scores:", scores[:10])
         st.write("Faster R-CNN raw labels:", labels_tensor[:10])
@@ -543,7 +571,7 @@ def detect_with_frcnn(model, image_np, min_confidence, debug_mode=False):
     draw_scores = []
 
     for box, score, label_id in zip(boxes, scores, labels_tensor):
-        if float(score) < threshold:
+        if float(score) < min_confidence:
             continue
 
         label_index = int(label_id) - 1
@@ -666,6 +694,10 @@ def render_price_list():
 def render_sidebar_controls():
     st.sidebar.markdown("## ⚙️ Input Settings")
 
+    if st.sidebar.button("Clear Model Cache"):
+        st.cache_resource.clear()
+        st.sidebar.success("Model cache cleared. Please rerun the app.")
+
     model_choice = st.sidebar.selectbox(
         "Select Model",
         ["YOLO", "Faster R-CNN", "SSD"]
@@ -783,7 +815,8 @@ with info_col3:
 st.markdown("<div class='section-card'>", unsafe_allow_html=True)
 
 try:
-    get_selected_model(model_choice)
+    with st.spinner(f"Loading {model_choice} model..."):
+        get_selected_model(model_choice)
 
     if input_mode == "Upload Image":
         uploaded_file = st.file_uploader(
@@ -816,10 +849,10 @@ try:
 
 except FileNotFoundError as e:
     st.error(f"Model file not found: {e}")
-    st.info("Make sure your model paths are correct for YOLO, Faster R-CNN, and SSD.")
+    st.info("Please check your model path or Google Drive link.")
 except RuntimeError as e:
     st.error(f"RuntimeError while loading model: {e}")
-    st.info("This usually means your saved .pth structure or num_classes does not match the current model.")
+    st.info("This usually means the model file is invalid, HTML was downloaded, or the saved weights do not match the model architecture.")
 except Exception as e:
     st.error(f"Error: {e}")
 
