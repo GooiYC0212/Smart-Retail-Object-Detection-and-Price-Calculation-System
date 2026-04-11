@@ -516,22 +516,19 @@ def download_file(url, save_path, progress_placeholder=None, status_placeholder=
         status_placeholder.empty()
 
 
-def ensure_model(path, url):
-    model_key = f"downloaded_{os.path.basename(path)}"
+def ensure_model(path, url, show_message=False):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
 
     if os.path.exists(path):
-        st.session_state[model_key] = True
         return
 
-    if st.session_state.get(model_key, False):
-        return
-
-    status_placeholder = st.empty()
+    status_placeholder = st.empty() if show_message else None
     progress_placeholder = st.empty()
 
-    status_placeholder.warning(
-        f"{os.path.basename(path)} not found. Downloading from Hugging Face..."
-    )
+    if show_message and status_placeholder is not None:
+        status_placeholder.warning(
+            f"{os.path.basename(path)} not found. Downloading from Hugging Face..."
+        )
 
     download_file(
         url,
@@ -540,7 +537,22 @@ def ensure_model(path, url):
         status_placeholder=status_placeholder
     )
 
-    st.session_state[model_key] = True
+
+def startup_check_models():
+    if st.session_state.get("startup_model_check_done", False):
+        return
+
+    model_list = [
+        (YOLO_MODEL_PATH, YOLO_URL),
+        (FRCNN_MODEL_PATH, FRCNN_URL),
+        (SSD_MODEL_PATH, SSD_URL),
+    ]
+
+    for path, url in model_list:
+        if not os.path.exists(path):
+            ensure_model(path, url, show_message=True)
+
+    st.session_state["startup_model_check_done"] = True
 
 
 # =========================
@@ -549,14 +561,14 @@ def ensure_model(path, url):
 @st.cache_resource
 def load_yolo():
     from ultralytics import YOLO
-    ensure_model(YOLO_MODEL_PATH, YOLO_URL)
+    ensure_model(YOLO_MODEL_PATH, YOLO_URL, show_message=False)
     model = YOLO(YOLO_MODEL_PATH)
     return model
 
 
 @st.cache_resource
 def load_frcnn():
-    ensure_model(FRCNN_MODEL_PATH, FRCNN_URL)
+    ensure_model(FRCNN_MODEL_PATH, FRCNN_URL, show_message=False)
 
     model = torchvision.models.detection.fasterrcnn_resnet50_fpn(
         weights=None,
@@ -575,7 +587,7 @@ def load_frcnn():
 
 @st.cache_resource
 def load_ssd():
-    ensure_model(SSD_MODEL_PATH, SSD_URL)
+    ensure_model(SSD_MODEL_PATH, SSD_URL, show_message=False)
 
     model = torchvision.models.detection.ssd300_vgg16(
         weights=None,
@@ -1225,6 +1237,7 @@ def render_bill_section(bill_rows, total_price):
 # APP
 # =========================
 render_header()
+startup_check_models()
 model_choice, input_mode, min_confidence = render_sidebar_controls()
 render_price_list()
 
